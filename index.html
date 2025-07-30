@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ahmad & Esraa's Wedding Photos</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(135deg, #fff9fb 0%, #fcf0f2 100%);
+            color: #5a4a4a;
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+        }
+
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><path fill="none" stroke="%23e8c4c4" stroke-width="0.5" stroke-opacity="0.2" d="M20,20 Q40,5 60,20 T100,20 M20,60 Q40,45 60,60 T100,60 M20,100 Q40,85 60,100 T100,100" /></svg>');
+            opacity: 0.15;
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        header {
+            text-align: center;
+            padding: 40px 0 20px;
+            margin-bottom: 30px;
+        }
+
+        .couple-names {
+            font-family: 'Playfair Display', serif;
+            font-size: 3.8rem;
+            color: #a67f78;
+            margin-bottom: 15px;
+            letter-spacing: 2px;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.1);
+            position: relative;
+            display: inline-block;
+        }
+
+        .couple-names::after {
+            content: "";
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background: linear-gradient(to right, #d4af37, #c19b53);
+            border-radius: 3px;
+        }
+
+        .subtitle {
+            font-size: 1.3rem;
+            color: #8d7373;
+            max-width: 700px;
+            margin: 30px auto 20px;
+            font-weight: 400;
+            line-height: 1.8;
+        }
+
+        .decoration {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 30px 0;
+        }
+
+        .decoration div {
+            height: 1px;
+            background: linear-gradient(to right, transparent, #d4af37, transparent);
+            width: 200px;
+            margin: 0 15px;
+        }
+
+        .decoration i {
+            color: #d4af37;
+            font-size: 1.5rem;
+            animation: pulse 2s infinite;
+        }
+
+        .upload-section {
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 8px 30px rgba(166, 127, 120, 0.15);
+            text-align: center;
+            margin-bottom: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(10px);
+        }
+
+        .upload-area {
+            border: 2px dashed #d4af37;
+            border-radius: 12px;
+            padding: 40px 20px;
+            margin: 20px 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(255, 248, 248, 0.5);
+        }
+
+        .upload-area:hover {
+            background: rgba(255, 248, 248, 0.8);
+            border-color: #c19b53;
+        }
+
+        .upload-area i {
+            font-size: 3.5rem;
+            color: #d4af37;
+            margin-bottom: 15px;
+        }
+
+        .upload-text {
+            font-size: 1.2rem;
+            color: #8d7373;
+            margin-bottom: 15px;
+        }
+
+        .btn {
+            background: linear-gradient(to right, #d4af37, #c19b53);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1.1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            box-shadow: 0 4px 15px rgba(166, 127, 120, 0.2);
+            margin: 5px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(166, 127, 120, 0.3);
+        }
+
+        .btn i {
+            margin-right: 8px;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px 0;
+            margin-top: 50px;
+            color: #8d7373;
+            font-size: 0.9rem;
+            border-top: 1px solid rgba(166, 127, 120, 0.2);
+        }
+
+        .floral-border {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .floral-border::before, .floral-border::after {
+            content: "";
+            position: absolute;
+            width: 150px;
+            height: 150px;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path fill="%23e8c4c4" opacity="0.3" d="M50,10 C60,10 70,15 75,25 C80,35 78,45 70,55 C60,65 50,70 40,65 C30,60 20,50 15,40 C10,30 15,20 25,15 C35,10 45,10 50,10 Z" /></svg>');
+            background-repeat: no-repeat;
+            background-size: contain;
+        }
+
+        .floral-border::before {
+            top: 20px;
+            left: 20px;
+        }
+
+        .floral-border::after {
+            bottom: 20px;
+            right: 20px;
+            transform: rotate(180deg);
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        .download-section {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        #downloadBtn {
+            display: none;
+            background: linear-gradient(to right, #78a67f, #53c19b);
+        }
+
+        .password-section {
+            display: none;
+            margin-top: 20px;
+        }
+
+        .password-input {
+            padding: 12px 20px;
+            border-radius: 50px;
+            border: 1px solid #d4af37;
+            font-size: 1rem;
+            width: 200px;
+            margin-right: 10px;
+        }
+
+        .confirmation {
+            color: #78a67f;
+            font-weight: 500;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .private-gallery {
+            display: none;
+            margin-top: 40px;
+        }
+
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 25px;
+            margin-top: 20px;
+        }
+
+        .gallery-item {
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            aspect-ratio: 4/5;
+            background: #f8f3ed;
+        }
+
+        .gallery-item:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .gallery-item:hover img {
+            transform: scale(1.05);
+        }
+
+        .section-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.2rem;
+            color: #a67f78;
+            text-align: center;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .section-title::after {
+            content: "";
+            display: block;
+            width: 80px;
+            height: 2px;
+            background: #d4af37;
+            margin: 10px auto;
+        }
+
+        /* Password button styles */
+        .password-toggle {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            z-index: 100;
+        }
+
+        .password-toggle-btn {
+            background: linear-gradient(to right, #a67f78, #8d7373);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .password-toggle-btn i {
+            margin-right: 8px;
+        }
+
+        .password-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .password-modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .password-modal h3 {
+            font-family: 'Playfair Display', serif;
+            color: #a67f78;
+            margin-bottom: 20px;
+        }
+
+        .password-modal input {
+            padding: 12px 20px;
+            border-radius: 50px;
+            border: 1px solid #d4af37;
+            font-size: 1rem;
+            width: 100%;
+            margin-bottom: 15px;
+        }
+
+        .password-modal .btn {
+            width: 100%;
+        }
+
+        /* Delete button styles */
+        .delete-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255, 0, 0, 0.7);
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .gallery-item:hover .delete-btn {
+            opacity: 1;
+        }
+
+        .delete-btn:hover {
+            background: rgba(255, 0, 0, 0.9);
+        }
+
+        @media (max-width: 768px) {
+            .couple-names {
+                font-size: 2.5rem;
+            }
+            
+            .upload-section {
+                padding: 20px;
+            }
+            
+            .gallery {
+                grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+        <div class="floral-border"></div>
+        
+        <header>
+            <h1 class="couple-names">Ahmad & Esraa</h1>
+            <p class="subtitle">Snapped some memories from our big day? We’d love to relive the moments with you—upload them here!</p>
+            
+            <div class="decoration">
+                <div></div>
+                <i class="fas fa-heart"></i>
+                <div></div>
+            </div>
+        </header>
+
+        <main>
+            <div class="upload-section">
+                <h2><i class="fas fa-cloud-upload-alt"></i> Upload Your Wedding Photos</h2>
+                <div class="upload-area" id="uploadArea">
+                    <i class="fas fa-camera"></i>
+                    <p class="upload-text">Click or drag photos to upload</p>
+                    <button class="btn" id="uploadBtn"><i class="fas fa-plus"></i> Select Photos</button>
+                    <input type="file" id="fileInput" accept="image/*" multiple>
+                </div>
+                
+                <div class="confirmation" id="confirmation">
+                    <i class="fas fa-check-circle"></i> Thank you for sharing your photos!
+                </div>
+            </div>
+
+            <div class="private-gallery" id="privateGallery">
+                <h2 class="section-title">All Wedding Photos</h2>
+                <div class="gallery" id="gallery"></div>
+                <div class="download-section">
+                    <button class="btn" id="downloadBtn"><i class="fas fa-download"></i> Download All Photos</button>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <p>Created by Moataz <i class="fas fa-heart" style="color: #e8c4c4;"></i> for Ahmad & Esraa's special day | 10 / 10 / 2025 Eternal Moments</p>
+        </footer>
+    </div>
+
+    <!-- Password toggle button -->
+    <div class="password-toggle">
+        <button class="password-toggle-btn" id="passwordToggleBtn"><i class="fas fa-lock"></i> Couple Access</button>
+    </div>
+
+    <!-- Password modal -->
+    <div class="password-modal" id="passwordModal">
+        <div class="password-modal-content">
+            <h3>Enter Couples Password</h3>
+            <input type="password" id="modalPasswordInput" placeholder="Enter password">
+            <button class="btn" id="modalVerifyBtn"><i class="fas fa-lock-open"></i> Verify</button>
+        </div>
+    </div>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const confirmation = document.getElementById('confirmation');
+        const privateGallery = document.getElementById('privateGallery');
+        const gallery = document.getElementById('gallery');
+        const passwordToggleBtn = document.getElementById('passwordToggleBtn');
+        const passwordModal = document.getElementById('passwordModal');
+        const modalPasswordInput = document.getElementById('modalPasswordInput');
+        const modalVerifyBtn = document.getElementById('modalVerifyBtn');
+        
+        // Load any previously uploaded photos from localStorage
+        let uploadedFiles = JSON.parse(localStorage.getItem('weddingPhotos')) || [];
+        const correctPassword = "AE753951";
+        
+        // Handle click on upload area
+        uploadArea.addEventListener('click', function(e) {
+            if (e.target !== uploadBtn) {
+                fileInput.click();
+            }
+        });
+
+        // Handle button click
+        uploadBtn.addEventListener('click', function() {
+            fileInput.click();
+        });
+
+        // Handle file selection
+        fileInput.addEventListener('change', function(e) {
+            const files = e.target.files;
+            if (files.length > 0) {
+                // Process each file
+                for (let i = 0; i < files.length; i++) {
+                    const file = files[i];
+                    if (file.type.match('image.*')) {
+                        // Convert file to base64 for storage
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            const fileData = {
+                                name: file.name,
+                                type: file.type,
+                                data: e.target.result.split(',')[1],
+                                uploadTime: new Date().toISOString()
+                            };
+                            uploadedFiles.push(fileData);
+                            
+                            // Save to localStorage
+                            localStorage.setItem('weddingPhotos', JSON.stringify(uploadedFiles));
+                            
+                            // If gallery is already visible, display the new photo immediately
+                            if (privateGallery.style.display === 'block') {
+                                displayAllPhotos();
+                            }
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                }
+                
+                // Show confirmation message
+                confirmation.style.display = 'block';
+                
+                // Reset input to allow uploading same files again
+                fileInput.value = '';
+                
+                // Hide confirmation after 5 seconds
+                setTimeout(() => {
+                    confirmation.style.display = 'none';
+                }, 5000);
+            }
+        });
+
+        // Toggle password modal
+        passwordToggleBtn.addEventListener('click', function() {
+            passwordModal.style.display = 'flex';
+            modalPasswordInput.focus();
+        });
+
+        // Verify password in modal
+        modalVerifyBtn.addEventListener('click', function() {
+            if (modalPasswordInput.value === correctPassword) {
+                // Show private gallery
+                privateGallery.style.display = 'block';
+                
+                // Show download button if there are photos
+                downloadBtn.style.display = uploadedFiles.length > 0 ? 'inline-block' : 'none';
+                
+                // Display all photos
+                displayAllPhotos();
+                
+                // Close modal
+                passwordModal.style.display = 'none';
+            } else {
+                alert("Incorrect password. Please try again.");
+                modalPasswordInput.value = '';
+            }
+        });
+
+        // Close modal when clicking outside
+        passwordModal.addEventListener('click', function(e) {
+            if (e.target === passwordModal) {
+                passwordModal.style.display = 'none';
+            }
+        });
+
+        // Display all uploaded photos in the private gallery
+        function displayAllPhotos() {
+            gallery.innerHTML = '';
+            
+            if (uploadedFiles.length === 0) {
+                gallery.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:#8d7373;">No photos uploaded yet.</p>';
+                return;
+            }
+            
+            // Sort photos by upload time (newest first)
+            uploadedFiles.sort((a, b) => new Date(b.uploadTime) - new Date(a.uploadTime));
+            
+            uploadedFiles.forEach((file, index) => {
+                const galleryItem = document.createElement('div');
+                galleryItem.className = 'gallery-item';
+                
+                const img = document.createElement('img');
+                img.src = `data:${file.type};base64,${file.data}`;
+                img.alt = 'Wedding photo';
+                
+                // Create delete button
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'delete-btn';
+                deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
+                deleteBtn.title = 'Delete photo';
+                
+                // Add click event to delete button
+                deleteBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    if (confirm('Are you sure you want to delete this photo?')) {
+                        // Remove the photo from the array
+                        uploadedFiles.splice(index, 1);
+                        
+                        // Update localStorage
+                        localStorage.setItem('weddingPhotos', JSON.stringify(uploadedFiles));
+                        
+                        // Refresh the gallery
+                        displayAllPhotos();
+                        
+                        // Hide download button if no photos left
+                        if (uploadedFiles.length === 0) {
+                            downloadBtn.style.display = 'none';
+                        }
+                    }
+                });
+                
+                galleryItem.appendChild(img);
+                galleryItem.appendChild(deleteBtn);
+                gallery.appendChild(galleryItem);
+            });
+        }
+
+        // Download all photos as zip
+        downloadBtn.addEventListener('click', function() {
+            if (uploadedFiles.length === 0) return;
+            
+            const zip = new JSZip();
+            const folder = zip.folder("Wedding Photos");
+            let count = 0;
+            
+            uploadedFiles.forEach((file, index) => {
+                const extension = file.name.split('.').pop() || 'jpg';
+                folder.file(`wedding-photo-${index + 1}.${extension}`, file.data, {base64: true});
+                count++;
+                
+                // When all files are added to zip
+                if (count === uploadedFiles.length) {
+                    zip.generateAsync({type: 'blob'}).then(function(content) {
+                        const link = document.createElement('a');
+                        link.href = URL.createObjectURL(content);
+                        link.download = 'Wedding-Photos-Ahmed-Esraa.zip';
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                    });
+                }
+            });
+        });
+
+        // Add drag and drop functionality
+        uploadArea.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            uploadArea.style.backgroundColor = 'rgba(255, 248, 248, 0.9)';
+            uploadArea.style.borderColor = '#c19b53';
+        });
+
+        uploadArea.addEventListener('dragleave', function() {
+            uploadArea.style.backgroundColor = 'rgba(255, 248, 248, 0.5)';
+            uploadArea.style.borderColor = '#d4af37';
+        });
+
+        uploadArea.addEventListener('drop', function(e) {
+            e.preventDefault();
+            uploadArea.style.backgroundColor = 'rgba(255, 248, 248, 0.5)';
+            uploadArea.style.borderColor = '#d4af37';
+            
+            const files = e.dataTransfer.files;
+            fileInput.files = files;
+            
+            // Trigger change event
+            const event = new Event('change');
+            fileInput.dispatchEvent(event);
+        });
+    });
+</script>
+ 
+</body>
+</html>
