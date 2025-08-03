@@ -6,9 +6,9 @@
     <title>Ahmad & Esraa's Wedding Photos</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
     <style>
-        * {
+       * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
@@ -412,7 +412,7 @@
         
         <header>
             <h1 class="couple-names">Ahmad & Esraa</h1>
-            <p class="subtitle">Snapped some memories from our big day? We’d love to relive the moments with you—upload them here!</p>
+            <p class="subtitle">Snapped some memories from our big day? We'd love to relive the moments with you—upload them here!</p>
             
             <div class="decoration">
                 <div></div>
@@ -441,6 +441,7 @@
                 <div class="gallery" id="gallery"></div>
                 <div class="download-section">
                     <button class="btn" id="downloadBtn"><i class="fas fa-download"></i> Download All Photos</button>
+                    <button class="btn" id="logoutBtn" style="background: #a67f78; display: none;"><i class="fas fa-sign-out-alt"></i> Logout</button>
                 </div>
             </div>
         </main>
@@ -464,154 +465,175 @@
         </div>
     </div>
     <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const uploadArea = document.getElementById('uploadArea');
-        const fileInput = document.getElementById('fileInput');
-        const uploadBtn = document.getElementById('uploadBtn');
-        const downloadBtn = document.getElementById('downloadBtn');
-        const confirmation = document.getElementById('confirmation');
-        const privateGallery = document.getElementById('privateGallery');
-        const gallery = document.getElementById('gallery');
-        const passwordToggleBtn = document.getElementById('passwordToggleBtn');
-        const passwordModal = document.getElementById('passwordModal');
-        const modalPasswordInput = document.getElementById('modalPasswordInput');
-        const modalVerifyBtn = document.getElementById('modalVerifyBtn');
-        
-        // Load any previously uploaded photos from localStorage
-        let uploadedFiles = JSON.parse(localStorage.getItem('weddingPhotos')) || [];
-        const correctPassword = "AE753951";
-        
-        // Handle click on upload area
-        uploadArea.addEventListener('click', function(e) {
-            if (e.target !== uploadBtn) {
-                fileInput.click();
-            }
-        });
+document.addEventListener('DOMContentLoaded', function() {
+    const uploadArea = document.getElementById('uploadArea');
+    const fileInput = document.getElementById('fileInput');
+    const uploadBtn = document.getElementById('uploadBtn');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const confirmation = document.getElementById('confirmation');
+    const privateGallery = document.getElementById('privateGallery');
+    const gallery = document.getElementById('gallery');
+    const passwordToggleBtn = document.getElementById('passwordToggleBtn');
+    const passwordModal = document.getElementById('passwordModal');
+    const modalPasswordInput = document.getElementById('modalPasswordInput');
+    const modalVerifyBtn = document.getElementById('modalVerifyBtn');
+    
+    // Check if user is already authenticated from sessionStorage
+    let isAuthenticated = sessionStorage.getItem('authenticated') === 'true';
 
-        // Handle button click
-        uploadBtn.addEventListener('click', function() {
-            fileInput.click();
-        });
+    // If already authenticated, show the gallery
+    if (isAuthenticated) {
+        privateGallery.style.display = 'block';
+        displayAllPhotos();
+        logoutBtn.style.display = 'inline-block';
+    }
 
-        // Handle file selection
-        fileInput.addEventListener('change', function(e) {
-            const files = e.target.files;
-            if (files.length > 0) {
-                // Process each file
-                for (let i = 0; i < files.length; i++) {
-                    const file = files[i];
-                    if (file.type.match('image.*')) {
-                        // Convert file to base64 for storage
-                        const reader = new FileReader();
-                        reader.onload = function(e) {
-                            const fileData = {
-                                name: file.name,
-                                type: file.type,
-                                data: e.target.result.split(',')[1],
-                                uploadTime: new Date().toISOString()
-                            };
-                            uploadedFiles.push(fileData);
-                            
-                            // Save to localStorage
-                            localStorage.setItem('weddingPhotos', JSON.stringify(uploadedFiles));
-                            
-                            // If gallery is already visible, display the new photo immediately
-                            if (privateGallery.style.display === 'block') {
-                                displayAllPhotos();
-                            }
-                        };
-                        reader.readAsDataURL(file);
-                    }
-                }
-                
-                // Show confirmation message
-                confirmation.style.display = 'block';
-                
-                // Reset input to allow uploading same files again
+    // Handle file uploads
+    fileInput.addEventListener('change', async function(e) {
+        const files = e.target.files;
+        if (files.length > 0) {
+            if (!isAuthenticated) {
+                alert("Please authenticate first using the Couple Access button.");
                 fileInput.value = '';
-                
-                // Hide confirmation after 5 seconds
-                setTimeout(() => {
-                    confirmation.style.display = 'none';
-                }, 5000);
-            }
-        });
-
-        // Toggle password modal
-        passwordToggleBtn.addEventListener('click', function() {
-            passwordModal.style.display = 'flex';
-            modalPasswordInput.focus();
-        });
-
-        // Verify password in modal
-        modalVerifyBtn.addEventListener('click', function() {
-            if (modalPasswordInput.value === correctPassword) {
-                // Show private gallery
-                privateGallery.style.display = 'block';
-                
-                // Show download button if there are photos
-                downloadBtn.style.display = uploadedFiles.length > 0 ? 'inline-block' : 'none';
-                
-                // Display all photos
-                displayAllPhotos();
-                
-                // Close modal
-                passwordModal.style.display = 'none';
-            } else {
-                alert("Incorrect password. Please try again.");
-                modalPasswordInput.value = '';
-            }
-        });
-
-        // Close modal when clicking outside
-        passwordModal.addEventListener('click', function(e) {
-            if (e.target === passwordModal) {
-                passwordModal.style.display = 'none';
-            }
-        });
-
-        // Display all uploaded photos in the private gallery
-        function displayAllPhotos() {
-            gallery.innerHTML = '';
-            
-            if (uploadedFiles.length === 0) {
-                gallery.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:#8d7373;">No photos uploaded yet.</p>';
                 return;
             }
             
-            // Sort photos by upload time (newest first)
-            uploadedFiles.sort((a, b) => new Date(b.uploadTime) - new Date(a.uploadTime));
+            const formData = new FormData();
             
-            uploadedFiles.forEach((file, index) => {
+            for (let i = 0; i < files.length; i++) {
+                // Validate file type
+                if (!files[i].type.match('image.*')) {
+                    alert('Only image files are allowed.');
+                    fileInput.value = '';
+                    return;
+                }
+                
+                // Validate file size (max 5MB)
+                if (files[i].size > 5 * 1024 * 1024) {
+                    alert('File size should be less than 5MB.');
+                    fileInput.value = '';
+                    return;
+                }
+                
+                formData.append('photos[]', files[i]);
+            }
+            
+            try {
+                // Show loading state
+                uploadBtn.disabled = true;
+                uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
+                
+                const response = await fetch('upload.php', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (result.error) throw new Error(result.error);
+                
+                confirmation.style.display = 'block';
+                fileInput.value = '';
+                setTimeout(() => { confirmation.style.display = 'none'; }, 5000);
+                
+                // Refresh the gallery
+                displayAllPhotos();
+            } catch (error) {
+                alert("Upload failed: " + error.message);
+            } finally {
+                uploadBtn.disabled = false;
+                uploadBtn.innerHTML = '<i class="fas fa-plus"></i> Select Photos';
+            }
+        }
+    });
+
+    // Password verification
+    modalVerifyBtn.addEventListener('click', async function() {
+        const password = modalPasswordInput.value.trim();
+        if (!password) {
+            alert("Please enter a password.");
+            return;
+        }
+        
+        try {
+            const response = await fetch('verify_password.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ password: password })
+            });
+            
+            const result = await response.json();
+            
+            if (result.valid) {
+                isAuthenticated = true;
+                sessionStorage.setItem('authenticated', 'true');
+                privateGallery.style.display = 'block';
+                logoutBtn.style.display = 'inline-block';
+                await displayAllPhotos();
+                passwordModal.style.display = 'none';
+                modalPasswordInput.value = '';
+            } else {
+                alert("Incorrect password. Try again.");
+                modalPasswordInput.value = '';
+            }
+        } catch (error) {
+            alert("Verification failed: " + error.message);
+        }
+    });
+
+    // Logout functionality
+    logoutBtn.addEventListener('click', function() {
+        isAuthenticated = false;
+        sessionStorage.removeItem('authenticated');
+        privateGallery.style.display = 'none';
+        logoutBtn.style.display = 'none';
+        gallery.innerHTML = '';
+    });
+
+    // Display all photos from the server
+    async function displayAllPhotos() {
+        try {
+            gallery.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:#8d7373;">Loading photos...</p>';
+            
+            const response = await fetch('get_photos.php');
+            const photos = await response.json();
+            
+            if (photos.error) throw new Error(photos.error);
+            
+            gallery.innerHTML = '';
+            if (photos.length === 0) {
+                gallery.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:#8d7373;">No photos uploaded yet.</p>';
+                downloadBtn.style.display = 'none';
+                return;
+            }
+            
+            photos.forEach((photo) => {
                 const galleryItem = document.createElement('div');
                 galleryItem.className = 'gallery-item';
                 
                 const img = document.createElement('img');
-                img.src = `data:${file.type};base64,${file.data}`;
+                img.src = photo.url;
                 img.alt = 'Wedding photo';
+                img.loading = 'lazy'; // Lazy loading for better performance
                 
-                // Create delete button
                 const deleteBtn = document.createElement('button');
                 deleteBtn.className = 'delete-btn';
                 deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
-                deleteBtn.title = 'Delete photo';
-                
-                // Add click event to delete button
-                deleteBtn.addEventListener('click', function(e) {
+                deleteBtn.addEventListener('click', async function(e) {
                     e.stopPropagation();
-                    if (confirm('Are you sure you want to delete this photo?')) {
-                        // Remove the photo from the array
-                        uploadedFiles.splice(index, 1);
-                        
-                        // Update localStorage
-                        localStorage.setItem('weddingPhotos', JSON.stringify(uploadedFiles));
-                        
-                        // Refresh the gallery
-                        displayAllPhotos();
-                        
-                        // Hide download button if no photos left
-                        if (uploadedFiles.length === 0) {
-                            downloadBtn.style.display = 'none';
+                    if (confirm('Delete this photo?')) {
+                        try {
+                            const deleteResponse = await fetch('delete_photo.php', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ filename: photo.name })
+                            });
+                            const result = await deleteResponse.json();
+                            if (!result.success) throw new Error(result.error);
+                            displayAllPhotos();
+                        } catch (error) {
+                            alert("Delete failed: " + error.message);
                         }
                     }
                 });
@@ -620,61 +642,65 @@
                 galleryItem.appendChild(deleteBtn);
                 gallery.appendChild(galleryItem);
             });
-        }
-
-        // Download all photos as zip
-        downloadBtn.addEventListener('click', function() {
-            if (uploadedFiles.length === 0) return;
             
-            const zip = new JSZip();
-            const folder = zip.folder("Wedding Photos");
-            let count = 0;
+            downloadBtn.style.display = photos.length > 0 ? 'inline-block' : 'none';
             
-            uploadedFiles.forEach((file, index) => {
-                const extension = file.name.split('.').pop() || 'jpg';
-                folder.file(`wedding-photo-${index + 1}.${extension}`, file.data, {base64: true});
-                count++;
-                
-                // When all files are added to zip
-                if (count === uploadedFiles.length) {
-                    zip.generateAsync({type: 'blob'}).then(function(content) {
-                        const link = document.createElement('a');
-                        link.href = URL.createObjectURL(content);
-                        link.download = 'Wedding-Photos-Ahmed-Esraa.zip';
-                        document.body.appendChild(link);
-                        link.click();
-                        document.body.removeChild(link);
-                    });
+            // Set up download all functionality
+            downloadBtn.onclick = async function() {
+                try {
+                    // This would need server-side implementation to zip photos
+                    alert("This would typically download a zip file of all photos. Server-side implementation needed.");
+                } catch (error) {
+                    alert("Download failed: " + error.message);
                 }
-            });
-        });
+            };
+        } catch (error) {
+            gallery.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:#8d7373;">Error loading photos: ' + error.message + '</p>';
+        }
+    }
 
-        // Add drag and drop functionality
-        uploadArea.addEventListener('dragover', function(e) {
-            e.preventDefault();
-            uploadArea.style.backgroundColor = 'rgba(255, 248, 248, 0.9)';
-            uploadArea.style.borderColor = '#c19b53';
-        });
+    // Password modal toggle
+    passwordToggleBtn.addEventListener('click', function() {
+        passwordModal.style.display = 'flex';
+        modalPasswordInput.focus();
+    });
 
-        uploadArea.addEventListener('dragleave', function() {
-            uploadArea.style.backgroundColor = 'rgba(255, 248, 248, 0.5)';
-            uploadArea.style.borderColor = '#d4af37';
-        });
+    // Close modal when clicking outside
+    passwordModal.addEventListener('click', function(e) {
+        if (e.target === passwordModal) {
+            passwordModal.style.display = 'none';
+        }
+    });
 
-        uploadArea.addEventListener('drop', function(e) {
-            e.preventDefault();
-            uploadArea.style.backgroundColor = 'rgba(255, 248, 248, 0.5)';
-            uploadArea.style.borderColor = '#d4af37';
-            
-            const files = e.dataTransfer.files;
-            fileInput.files = files;
-            
-            // Trigger change event
+    // Drag-and-drop functionality
+    uploadArea.addEventListener('dragover', (e) => { 
+        e.preventDefault(); 
+        uploadArea.style.borderColor = '#c19b53';
+        uploadArea.style.backgroundColor = 'rgba(255, 248, 248, 0.8)';
+    });
+    
+    uploadArea.addEventListener('dragleave', () => { 
+        uploadArea.style.borderColor = '#d4af37';
+        uploadArea.style.backgroundColor = 'rgba(255, 248, 248, 0.5)';
+    });
+    
+    uploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadArea.style.borderColor = '#d4af37';
+        uploadArea.style.backgroundColor = 'rgba(255, 248, 248, 0.5)';
+        
+        if (e.dataTransfer.files.length > 0) {
+            fileInput.files = e.dataTransfer.files;
             const event = new Event('change');
             fileInput.dispatchEvent(event);
-        });
+        }
     });
+
+    // Click on upload area triggers file input
+    uploadArea.addEventListener('click', function() {
+        fileInput.click();
+    });
+});
 </script>
- 
 </body>
 </html>
